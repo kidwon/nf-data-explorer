@@ -8,6 +8,10 @@ export function isVersion3(client: Client): boolean {
   return getVersion(client).startsWith('3.');
 }
 
+export function isVersion4(client: Client): boolean {
+  return getVersion(client).startsWith('4.');
+}
+
 export function getVersion(client: Client): string {
   return client.controlConnection.host.cassandraVersion;
 }

@@ -6,7 +6,7 @@ import {
   ITableSummary,
 } from '../../typings/cassandra';
 import { CassandraTableNotFound } from '../errors';
-import { isVersion3 } from '../utils/cluster-utils';
+import { isVersion3, isVersion4 } from '../utils/cluster-utils';
 import { streamAllResults } from '../utils/query-utils';
 import {
   extractCompaction,
@@ -35,7 +35,7 @@ export async function getTables(
     'default_time_to_live',
     'speculative_retry',
   ];
-  const isV3 = isVersion3(client);
+  const isV3 = isVersion3(client) || isVersion4(client);
 
   let queryBuilder = new Select.Builder();
   if (isV3) {

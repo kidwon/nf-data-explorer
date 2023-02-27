@@ -1,7 +1,7 @@
 import { Client, types } from 'cassandra-driver';
 import { IUserDefinedType } from '../../typings/cassandra';
 import * as config from '../cassandra-config';
-import { isVersion3 } from '../utils/cluster-utils';
+import { isVersion3, isVersion4 } from '../utils/cluster-utils';
 import { Select } from './query-builder';
 
 /**
@@ -53,13 +53,14 @@ export async function getTypes(
   await client.connect();
 
   const isV3 = isVersion3(client);
+  const isV4 = isVersion4(client)
 
   // filter for included standard types
   const keyspaceTypes = Object.keys(types.dataTypes).filter((key) => {
     const value = types.dataTypes[key];
     if (
       value instanceof Function ||
-      (v3Types.has(key) && !isV3) ||
+      (v3Types.has(key) && !isV3 && !isV4) ||
       unsupportedTypes.has(key)
     ) {
       return false;
@@ -68,8 +69,8 @@ export async function getTypes(
   });
 
   // fetch UDTs
-  const keyspace = isV3 ? 'system_schema' : 'system';
-  const table = isV3 ? 'types' : 'schema_usertypes';
+  const keyspace = (isV3 || isV4) ? 'system_schema' : 'system';
+  const table = (isV3 || isV4) ? 'types' : 'schema_usertypes';
   const query = new Select.Builder()
     .all()
     .from(keyspace, table)
@@ -86,7 +87,7 @@ export async function getTypes(
       fields: (udt.field_names as any[])
         .map((name, index) => {
           let type = udt.field_types[index];
-          if (!isV3) {
+          if (!isV3 && !isV4) {
             type = v2TypeMap.get(type) || type; // if we don't have a mapped type return the class name
           }
           return { name, type };

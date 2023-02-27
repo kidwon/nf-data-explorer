@@ -16,7 +16,7 @@ async function setupCassandra(discoveryProvider) {
   section('C* Authentication');
   info(
     'We have limited support for C* authentication. A single username/password can be used\n' +
-      'for all clusters if required or running locally (by default C* has authentication turned on).',
+    'for all clusters if required or running locally (by default C* has authentication turned on).',
   );
 
   let answers = {};
